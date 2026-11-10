@@ -54,3 +54,4 @@ Done means a fresh checkout can be configured, seeded, authenticated, and run us
 - **2026-11-09:** Replaced the generic non-solar group with high and low winter usage profiles, retaining solar and winter profile as independent attributes. Reduced the synthetic solar share from 20% to 2% and rebalanced the demo fixture.
 - **2026-11-09:** Established the contract-month as the financial grain and separated realized contract totals from future scenarios.
 - **2026-11-09:** Kept PostgreSQL document retrieval as the baseline; made retrieval and agent evals explicit, with semantic retrieval contingent on measured gaps.
+- **2026-11-09:** Implemented the first financial layer in standard-library Python with integer USD cents (exact decimal fixed point). The generated fixture is compressed JSON Lines with explicit snapshot cutoffs. PostgreSQL ingestion remains a separate milestone and should reconcile to these reference totals.

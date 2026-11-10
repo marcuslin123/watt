@@ -2,13 +2,26 @@
 
 ## Current state — 2026-11-09
 
-Planning and documentation only. The [design](docs/design.md) records the demo workflow, customer groups, contract and monthly margins, retrieval, verification, and scope. [AGENTS.md](AGENTS.md) records durable working rules.
+The local Codex SDK feasibility probe passed. The [product brief and roadmap](docs/prd.md) describe demo acceptance and future work; the [design](docs/design.md) owns technical decisions. [AGENTS.md](AGENTS.md) records durable working rules.
 
-No product code, dependencies, database, or tests have been added. No implementation checks have been run.
+The Python margin foundation and synthetic export are ready. No product services, PostgreSQL ingestion, or frontend have been built. The SDK probe ran in a temporary Python environment using only a synthetic fixture.
 
-## Next milestone, once implementation is authorized
+## SDK feasibility evidence — 2026-11-09
 
-Verify that the Codex Python SDK can use ChatGPT authentication and run a bounded local investigation with custom tools, structured output, streamed progress, and restricted permissions. Record actual results here before building around the SDK.
+- Tested `openai-codex==0.167.0` and its matching bundled CLI on Python 3.13.1. Forced ChatGPT sign-in, unset `OPENAI_API_KEY` and `CODEX_API_KEY`, and confirmed that the SDK reported account type `chatgpt` before a live model turn.
+- Received tool-start and tool-completion events for an actual call to a local MCP fixture. The completed turn returned the fixture's exact evidence ID and signed integer margin delta in schema-constrained JSON.
+- Used a read-only sandbox and deny-all approvals. The unannotated fixture tool was rejected; declaring the genuinely read-only tool with MCP's `readOnlyHint` allowed it without changing the approval policy. Treat annotations as metadata and enforce read-only access in the tool implementation.
+- Disabled shell and unified execution in the probe configuration. A separate turn requesting a harmless shell command completed without any shell or alternate tool event. This is a targeted capability check, not a full audit of the eventual Watt worker and its tool allowlist.
+
+## Margin foundation — 2026-11-09
+
+- Generated 10,000 fictional contracts and 240,000 contract-month records. The [README](README.md) documents how to regenerate the compressed files and run the suite without dependencies.
+- Implemented exact cent arithmetic, reported and normalized views, realized contract totals with coverage, and monthly group and portfolio rollups. Winter profiles use only the fixed reference window; missing classifications stay visible in reconciliation.
+- All eight tests passed with `python3 -m unittest discover -s tests -v`. A separate read of the exported files verified record counts, unique keys, and the planted solar drivers. November margin was $571,322.95 and December was $570,322.95. High Winter Usage moved +$2,200, Low Winter Usage −$800, and Solar −$2,400.
+
+## Next milestone
+
+Load the synthetic snapshots into PostgreSQL, expose read-only views, and verify database results against the Python totals. Keep the SDK integration behind the investigator interface and verify the worker's tool allowlist before connecting it to any data source.
 
 ## Updating this log
 
