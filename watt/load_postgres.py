@@ -82,8 +82,10 @@ $$;
 ANALYZE watt_source.contract;
 ANALYZE watt_source.contract_month;
 ANALYZE watt_source.adjustment;
-COMMIT;
 """)
+        # Seed the evidence library in the same transaction.
+        stream.write(schema.with_name("evidence.sql").read_text(encoding="utf-8"))
+        stream.write("COMMIT;\n")
         stream.flush()
         stream.seek(0)
         subprocess.run(["psql", "-X", "-v", "ON_ERROR_STOP=1"], stdin=stream, check=True)

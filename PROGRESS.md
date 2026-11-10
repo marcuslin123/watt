@@ -26,6 +26,11 @@ The Python margin foundation and local PostgreSQL snapshots are verified. No app
 - A separate read-only subagent confirmed the snapshot cutoffs, December-only adjustments, exact November and December group totals, and no write or private-schema access for `watt_analyst`. The eight Python unit tests also passed.
 - Computing the fixed winter median once per query reduced the measured December portfolio rollup from about 20 seconds to 103 ms on this local run. This is a query measurement, not an application latency benchmark.
 
+## Prepared evidence retrieval — 2026-11-10
+
+- Seeded a synthetic library with dated plan revisions, a December settlement note, and a contract-specific service record. Parameterized search applies the snapshot publication cutoff and selected month’s effective dates, selects the latest applicable revision, then filters and ranks matching text.
+- Eight live retrieval cases passed, including later publication, stale revision, wrong contract, and unresolved usage. Full PostgreSQL reconciliation and all eight Python unit tests also passed. An independent read-only subagent reran the retrieval cases and confirmed the analyst grants.
+
 ## Next milestone
 
 Define the portfolio API and build the portfolio and contract drill-down in the next authorized milestone. Keep the SDK integration behind the investigator interface and verify the worker's tool allowlist before connecting it to any data source.

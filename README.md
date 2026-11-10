@@ -32,3 +32,15 @@ python3 -m watt.verify_postgres
 The one-time loader targets a fresh Watt cluster. Schema, roles, and fixture rows load in one transaction. It refuses to replace an existing installation. To reuse the seeded database after restart, skip the load step. Keep using the original password with the existing volume.
 
 Query the `watt_reporting` views with an explicit `snapshot` filter (`initial` or `refreshed`). `watt_analyst` is a no-login role with reporting access only; the verifier uses the setup account to assume that role in a read-only transaction. Do not give an application the setup account's credentials.
+
+## Check evidence retrieval
+
+Fresh loads include the prepared synthetic source library. For a database loaded before the library was added, apply the one-time upgrade with `psql -X -1 -v ON_ERROR_STOP=1 -f sql/evidence.sql` using the setup account.
+
+```sh
+python3 -m venv .venv
+.venv/bin/python -m pip install -r requirements.txt
+.venv/bin/python -m watt.verify_retrieval
+```
+
+The checks query PostgreSQL as `watt_analyst`. They cover effective dates, publication cutoffs, replacement versions, exact IDs and contract scope, and an intentionally unresolved usage change. The library is synthetic and its records do not authorize actions.
