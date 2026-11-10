@@ -1,10 +1,10 @@
 # Watt Progress
 
-## Current state — 2026-11-09
+## Current state — 2026-11-10
 
 The local Codex SDK feasibility probe passed. The [product brief and roadmap](docs/prd.md) describe demo acceptance and future work; the [design](docs/design.md) owns technical decisions. [AGENTS.md](AGENTS.md) records durable working rules.
 
-The Python margin foundation and synthetic export are ready. No product services, PostgreSQL ingestion, or frontend have been built. The SDK probe ran in a temporary Python environment using only a synthetic fixture.
+The Python margin foundation and local PostgreSQL snapshots are verified. No application service or frontend has been built. The SDK probe ran in a temporary Python environment using only a synthetic fixture.
 
 ## SDK feasibility evidence — 2026-11-09
 
@@ -19,9 +19,16 @@ The Python margin foundation and synthetic export are ready. No product services
 - Implemented exact cent arithmetic, reported and normalized views, realized contract totals with coverage, and monthly group and portfolio rollups. Winter profiles use only the fixed reference window; missing classifications stay visible in reconciliation.
 - All eight tests passed with `python3 -m unittest discover -s tests -v`. A separate read of the exported files verified record counts, unique keys, and the planted solar drivers. November margin was $571,322.95 and December was $570,322.95. High Winter Usage moved +$2,200, Low Winter Usage −$800, and Solar −$2,400.
 
+## PostgreSQL snapshots — 2026-11-10
+
+- Loaded 10,000 synthetic contracts, 240,000 contract-month rows, and 20 adjustments into local PostgreSQL 17.11. The transactional loader refuses an existing installation rather than replacing it. The [README](README.md#load-and-verify-postgresql) documents setup, loading, and verification.
+- Ran `python3 -m watt.verify_postgres` as the read-only reporting role. The initial snapshot ended in November (230,000 rows); the refreshed snapshot included December (240,000 rows). Every contract-month, contract total and coverage count, group-month total, and portfolio-month total matched Python for reported and normalized margins.
+- A separate read-only subagent confirmed the snapshot cutoffs, December-only adjustments, exact November and December group totals, and no write or private-schema access for `watt_analyst`. The eight Python unit tests also passed.
+- Computing the fixed winter median once per query reduced the measured December portfolio rollup from about 20 seconds to 103 ms on this local run. This is a query measurement, not an application latency benchmark.
+
 ## Next milestone
 
-Load the synthetic snapshots into PostgreSQL, expose read-only views, and verify database results against the Python totals. Keep the SDK integration behind the investigator interface and verify the worker's tool allowlist before connecting it to any data source.
+Define the portfolio API and build the portfolio and contract drill-down in the next authorized milestone. Keep the SDK integration behind the investigator interface and verify the worker's tool allowlist before connecting it to any data source.
 
 ## Updating this log
 
