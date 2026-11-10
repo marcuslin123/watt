@@ -37,3 +37,25 @@ def search_evidence(connection, snapshot, month, words="", *, group=None,
                "evidence_id": evidence_id, "kind": kind, "words": words,
                "limit": max(1, min(limit, 20))})
         return cursor.fetchall()
+
+
+def read_context(connection, snapshot, month, location="DFW"):
+    """Lookup prepared market notices and weather without turning them into causes."""
+    with connection.cursor(row_factory=dict_row) as cursor:
+        cursor.execute("""
+            SELECT e.evidence_id, e.title, e.section, e.published_on, e.effective_from,
+                   e.body, e.source_url, e.synthetic
+            FROM watt_reporting.evidence e JOIN watt_reporting.snapshots s ON s.snapshot=%s
+            WHERE e.kind='market' AND e.customer_group IS NULL AND e.contract_id IS NULL
+              AND %s::date <= s.cutoff AND e.published_on < s.cutoff + interval '1 month'
+              AND e.effective_from >= %s::date AND e.effective_from < %s::date + interval '1 month'
+            ORDER BY e.evidence_id
+        """, (snapshot, month, month, month))
+        notices = cursor.fetchall()
+        cursor.execute("""
+            SELECT w.location, w.month, w.published_on, w.mean_high_f, w.mean_low_f, w.source_url
+            FROM watt_reporting.weather w JOIN watt_reporting.snapshots s ON s.snapshot=%s
+            WHERE w.location=%s AND w.month=%s AND w.month <= s.cutoff
+              AND w.published_on < s.cutoff + interval '1 month'
+        """, (snapshot, location, month))
+        return notices, cursor.fetchall()

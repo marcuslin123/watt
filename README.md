@@ -2,16 +2,18 @@
 
 Watt investigates margin changes in a retail electricity portfolio. See the [product brief](docs/prd.md), [design](docs/design.md), and [progress log](PROGRESS.md).
 
+[Watch the verified browser walkthrough](docs/evidence/demo.webm) (WebM, no narration).
+
 ## Generate and verify the synthetic portfolio
 
 From the repository root, with Python 3.11 or newer:
 
 ```sh
 python3 -m watt.synthetic data/generated/demo
-python3 -m unittest discover -s tests -v
+python3 -m unittest discover -s tests -p test_finance.py -v
 ```
 
-No third-party packages or credentials are needed for this milestone. The exporter requires a new destination directory to avoid overwriting an existing export. It writes a manifest, `contracts.jsonl.gz`, and `contract_months.jsonl.gz`. Every record is fictional. The manifest defines the November and December 2025 snapshot cutoffs; both use the same immutable records. Monetary fields are integer USD cents and usage is whole kWh.
+Generation and the finance-only checks need no third-party packages or credentials. The exporter requires a new destination directory to avoid overwriting an existing export. It writes a manifest, `contracts.jsonl.gz`, and `contract_months.jsonl.gz`. Every customer record is fictional. The manifest defines the November and December 2025 snapshot cutoffs; both use the same immutable records. Monetary fields are integer USD cents and usage is whole kWh.
 
 The suite checks exact totals across 24 reporting months and verifies the December portfolio movement against independently specified targets. It also covers adjustment signs, incomplete contract history, duplicate rows, and winter classification cutoffs.
 
@@ -35,19 +37,20 @@ Query the `watt_reporting` views with an explicit `snapshot` filter (`initial` o
 
 ## Check evidence retrieval
 
-Fresh loads include the prepared synthetic source library. For a database loaded before the library was added, apply the one-time upgrade with `psql -X -1 -v ON_ERROR_STOP=1 -f sql/evidence.sql` using the setup account.
+Fresh loads include the prepared synthetic source library and dated public context. For an older database, apply any missing one-time upgrades in order using the setup account: `psql -X -1 -v ON_ERROR_STOP=1 -f sql/evidence.sql`, then `psql -X -1 -v ON_ERROR_STOP=1 -f sql/context.sql`. Do not run an upgrade already included in the load.
 
 ```sh
 python3 -m venv .venv
 .venv/bin/python -m pip install -r requirements.txt
+.venv/bin/python -m unittest discover -s tests -v
 .venv/bin/python -m watt.verify_retrieval
 ```
 
-The checks query PostgreSQL as `watt_analyst`. They cover effective dates, publication cutoffs, replacement versions, exact IDs and contract scope, and an intentionally unresolved usage change. The library is synthetic and its records do not authorize actions.
+The retrieval checks query PostgreSQL as `watt_analyst`. They cover effective dates, publication cutoffs, replacement versions, exact IDs and contract scope, and an intentionally unresolved usage change. Synthetic customer evidence is labeled separately from dated public context. Neither authorizes actions.
 
 ## Run the portfolio workspace
 
-After loading PostgreSQL and installing the Python requirements, create the reporting login once using the setup connection from the database section. Use a separate password. For the connection URL below, use a URL-safe password (for example, a random hex string).
+With Node.js 22 or newer available, load PostgreSQL and install the Python requirements above, then create the reporting login once using the setup connection. Use a separate password. For the connection URL below, use a URL-safe password (for example, a random hex string).
 
 ```sh
 read -rs WATT_READER_PASSWORD
@@ -94,6 +97,8 @@ Use `codex login status` to confirm ChatGPT sign-in, or sign in with `codex logi
 .venv/bin/python -m watt.verify_agent
 WATT_RUN_LIVE=1 npm --prefix web run test:e2e
 ```
+
+Set `WATT_RECORD=1` with the live browser run to record a WebM in `web/test-results/`. After the walkthrough, restart the API and run `.venv/bin/python -m watt.verify_persistence` with the state connection exported to check that the original and analyst revision are restored.
 
 The browser suite’s live investigation case requires the worker to be running. It verifies live progress, the three synthetic drivers, evidence inspection, analyst review, and scenario comparison; see the [investigation capture](docs/evidence/investigation.png) and [retention comparison](docs/evidence/retention.png).
 

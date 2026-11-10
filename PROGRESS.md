@@ -4,7 +4,7 @@
 
 The local Codex SDK feasibility probe passed. The [product brief and roadmap](docs/prd.md) describe demo acceptance and future work; the [design](docs/design.md) owns technical decisions. [AGENTS.md](AGENTS.md) records durable working rules.
 
-The Python margin foundation, PostgreSQL snapshots, portfolio workspace, live investigator, and decision support are verified. Fresh-checkout delivery remains.
+The local demo passed the fresh-checkout rehearsal, including a live Codex investigation, analyst revision, scenario comparison, and restoration after an API restart. [Recorded walkthrough](docs/evidence/demo.webm).
 
 ## SDK feasibility evidence — 2026-11-09
 
@@ -50,9 +50,13 @@ The Python margin foundation, PostgreSQL snapshots, portfolio workspace, live in
 - The live browser flow checked original-run preservation, analyst provenance, an unresolved follow-up, and scenario sensitivity ($420 at 80% stay probability versus −$1,230 at 70%). [Retention comparison capture](docs/evidence/retention.png).
 - All six browser checks, TypeScript, and the production build passed. An independent read-only subagent verified the saved revision and scenario. Its fractional-cent finding led to a regression test and a rounding fix; all 18 Python tests and the two affected browser checks then passed.
 
-## Next milestone
+## Demo delivery — 2026-11-10
 
-Audit the demo requirements, verify a fresh checkout with a new local database, and record the complete browser walkthrough.
+- Rehearsed from a clean local clone with only the release-candidate diff, a new PostgreSQL volume, new credentials, and fresh Python and npm installs. Loaded the synthetic portfolio and provisioned distinct reporting and state logins.
+- `python -m unittest discover -s tests -v`: 20 passed. `watt.verify_postgres`: 470,000 contract-month comparisons, both snapshot rollups, and reporting permissions verified. `watt.verify_retrieval`: 14 passed. `watt.verify_agent`: two live ChatGPT-authenticated cases passed.
+- `WATT_RUN_LIVE=1 WATT_RECORD=1 npm --prefix web run test:e2e`: seven passed, including the complete live walkthrough and simulated partial and authentication-failure views. TypeScript and production build passed. A newly started API passed `watt.verify_persistence`, restoring the original result and its isolated revision.
+- Final audit added reconciled supply-cost usage/rate effects and dated public context. The ERCOT notice is displayed as context only; the DFW monthly report is excluded because it was issued after the December cutoff. The independent read-only verifier checked the fresh database, all cost effects, the saved run, and captures; its setup-documentation findings were corrected.
+- Browser evidence: [portfolio](docs/evidence/portfolio.png), [contract](docs/evidence/contract.png), [investigation](docs/evidence/investigation.png), [retention](docs/evidence/retention.png), and [full walkthrough](docs/evidence/demo.webm). Chromium played the recorded WebM at 1280 × 720.
 
 ## Updating this log
 

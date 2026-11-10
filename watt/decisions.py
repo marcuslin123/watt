@@ -89,6 +89,8 @@ def follow_up(findings, question):
         keys = {"usage"}
     elif words & {"settlement", "adjustment", "normalized"}:
         keys = {"settlement"}
+    elif words & {"ercot", "weather", "market"}:
+        keys = {"context"}
     elif words & {"credit", "credits", "plan"}:
         keys = {"credits"}
     elif words & {"margin", "drivers", "decline", "change", "bridge", "evidence"}:
@@ -100,4 +102,4 @@ def follow_up(findings, question):
             for row in findings if row["key"] in keys]
     return {"rows": rows,
             "message": "Based on this saved investigation." if rows
-            else "This investigation cannot answer that question. Try asking about margin drivers, posted adjustments, credits, or usage."}
+            else "This investigation cannot answer that question. Try asking about margin drivers, posted adjustments, credits, usage, or market context."}

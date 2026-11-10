@@ -85,6 +85,7 @@ ANALYZE watt_source.adjustment;
 """)
         # Seed the evidence library in the same transaction.
         stream.write(schema.with_name("evidence.sql").read_text(encoding="utf-8"))
+        stream.write(schema.with_name("context.sql").read_text(encoding="utf-8"))
         stream.write("COMMIT;\n")
         stream.flush()
         stream.seek(0)

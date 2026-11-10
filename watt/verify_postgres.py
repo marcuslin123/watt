@@ -67,7 +67,7 @@ def verify() -> None:
         FROM pg_class c JOIN pg_namespace n ON c.relnamespace = n.oid
         WHERE n.nspname IN ('watt_source', 'watt_reporting') AND c.relkind IN ('r', 'v')
     """)
-    assert len(permissions) == 13, permissions
+    assert len(permissions) == 15, permissions
     for schema, name, select, write, usage, create in permissions:
         expected_access = "t" if schema == "watt_reporting" else "f"
         assert (select, write, usage, create) == (expected_access, "f", expected_access, "f"), name

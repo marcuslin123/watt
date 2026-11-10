@@ -12,6 +12,7 @@ def main():
         "adjustments": "Read prior-service adjustments posted in the compared months.",
         "usage": "Read valid matched contracts with decreased grid imports; does not establish a cause.",
         "documents": "Read applicable prepared evidence, with effective dates and source IDs.",
+        "context": "Read dated public market notices and the prepared DFW weather coverage for the selected reporting month.",
     }
     for line in sys.stdin:
         request = json.loads(line)

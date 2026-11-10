@@ -1,10 +1,11 @@
 """Scoped SQL tools and deterministic publication of supported findings."""
 from datetime import date
+from decimal import Decimal, ROUND_HALF_UP
 from typing import Literal
 
 from pydantic import BaseModel
 from .db import reporting
-from .evidence import search_evidence
+from .evidence import read_context, search_evidence
 
 
 class Scope(BaseModel):
@@ -21,6 +22,16 @@ def evidence(tool, key, title, **values):
     return {"tool": tool, "id": key, "title": title, **values}
 
 
+def cost_effects(old_usage, new_usage, old_cost, new_cost):
+    """Allocate a comparable supply-cost change at the prior effective unit cost."""
+    delta = new_cost - old_cost
+    if not old_usage or not new_usage:
+        return {"usage_cents": 0, "unit_cost_cents": 0, "direct_cents": delta}
+    volume = Decimal((new_usage - old_usage) * old_cost) / old_usage
+    usage = int(volume.quantize(Decimal("1"), rounding=ROUND_HALF_UP))
+    return {"usage_cents": usage, "unit_cost_cents": delta - usage, "direct_cents": 0}
+
+
 def read_tool(scope, tool):
     now, prior = scope.month, previous(scope.month)
     args = (scope.snapshot, scope.group, prior, now)
@@ -28,12 +39,25 @@ def read_tool(scope, tool):
         if tool == "bridge":
             rows = conn.execute("""
                 SELECT posting_month AS month, plan, sum(reported)::bigint AS reported,
-                    sum(normalized)::bigint AS normalized, sum(export_credits)::bigint AS credits
+                    sum(normalized)::bigint AS normalized, sum(export_credits)::bigint AS credits,
+                    sum(imported_kwh)::bigint AS imports,
+                    sum(wholesale+ancillary+transmission+other)::bigint AS supply_cost
                 FROM watt_reporting.contract_month
                 WHERE snapshot=%s AND customer_group=%s AND posting_month IN (%s,%s)
                 GROUP BY posting_month, plan ORDER BY posting_month, plan
             """, args).fetchall()
-            return [evidence(tool, "group-margin", "Group margin bridge", rows=rows)]
+            effects = []
+            by_plan = {}
+            for row in rows:
+                by_plan.setdefault(row["plan"], {})[row["month"]] = row
+            for plan, periods in sorted(by_plan.items()):
+                if now not in periods or prior not in periods:
+                    continue
+                old, new = periods[prior], periods[now]
+                effects.append({"plan": plan, **cost_effects(old["imports"], new["imports"],
+                                                            old["supply_cost"], new["supply_cost"])})
+            return [evidence(tool, "group-margin", "Group margin bridge", rows=rows,
+                             supply_cost_effects=effects)]
         if tool == "adjustments":
             rows = conn.execute("""
                 SELECT a.evidence_id, a.contract_id, a.posting_month, a.service_month, a.cost_cents
@@ -55,13 +79,18 @@ def read_tool(scope, tool):
                   AND cur.imported_kwh < old.imported_kwh
             """, args).fetchone()
             return [evidence(tool, "usage-drops", "Contracts with lower recorded imports", **result)]
+        if tool == "context":
+            notices, weather = read_context(conn, scope.snapshot, now)
+            return [evidence(tool, row["evidence_id"], row["title"], document=row) for row in notices] + [
+                evidence(tool, "dfw-weather", "Dallas/Fort Worth weather coverage",
+                         readings=weather, available=bool(weather))]
         if tool == "documents":
             rows = search_evidence(conn, scope.snapshot, now, group=scope.group)
             return [evidence(tool, row["evidence_id"], row["title"], document=row) for row in rows]
     raise ValueError("Unknown analytical tool")
 
 
-TOOLS = ("bridge", "adjustments", "usage", "documents")
+TOOLS = ("bridge", "adjustments", "usage", "documents", "context")
 
 
 def catalog(scope, packs):
@@ -104,6 +133,14 @@ def catalog(scope, packs):
         add("usage", "unresolved", "Lower recorded imports; cause unresolved",
             "These contracts contributed to the margin movement. Verify meter readings or dated service records before attributing the decline to a move or changing future assumptions.",
             usage[0]["delta"], usage)
+    context = packs.get("context", [])
+    if context:
+        weather = next((row for row in context if row["id"] == "dfw-weather"), {})
+        weather_note = ("The prepared DFW station observations are regional context only."
+                        if weather.get("available") else "No DFW weather observation was available by this snapshot cutoff.")
+        add("context", "observed", "Public market and weather context",
+            weather_note + " A market notice or weather observation does not establish a customer margin cause.",
+            None, context)
     return out
 
 

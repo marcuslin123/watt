@@ -3,7 +3,7 @@ import unittest
 
 import psycopg
 
-from .evidence import search_evidence
+from .evidence import read_context, search_evidence
 
 
 class RetrievalTests(unittest.TestCase):
@@ -55,6 +55,29 @@ class RetrievalTests(unittest.TestCase):
     def test_unknown_cause_has_no_move_out_evidence(self):
         self.assertEqual(self.ids("refreshed", "2025-12-01", "move-out",
                                   group="solar", contract_id="contract-00000"), set())
+
+    def test_future_version_excluded_even_by_exact_id(self):
+        self.assertFalse(self.ids("refreshed", "2025-12-01", group="solar", evidence_id="solar-plan-future"))
+
+    def test_superseded_version_excluded_even_by_exact_id(self):
+        self.assertFalse(self.ids("refreshed", "2025-12-01", group="solar", evidence_id="solar-plan-v1"))
+
+    def test_wrong_group_excluded_even_with_exact_terms(self):
+        self.assertFalse(self.ids("refreshed", "2025-12-01", "export credit", group="high_winter"))
+
+    def test_public_notice_is_available_with_provenance(self):
+        notices, _ = read_context(self.connection, "refreshed", "2025-12-01")
+        self.assertEqual([(row["evidence_id"], row["synthetic"]) for row in notices],
+                         [("ercot-rtcb-go-live", False)])
+        self.assertTrue(notices[0]["source_url"].startswith("https://www.ercot.com/"))
+
+    def test_notice_excluded_before_effective_month(self):
+        notices, _ = read_context(self.connection, "refreshed", "2025-11-01")
+        self.assertFalse(notices)
+
+    def test_weather_published_in_january_excluded_from_december(self):
+        _, weather = read_context(self.connection, "refreshed", "2025-12-01", "DFW")
+        self.assertFalse(weather)
 
 
 if __name__ == "__main__":

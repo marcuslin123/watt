@@ -6,9 +6,9 @@ import sys
 CASES = (
     ("December Solar", {"snapshot": "refreshed", "month": "2025-12-01", "group": "solar"},
      {"bridge": ("calculated", -240000), "settlement": ("supported", -90000),
-      "credits": ("supported", -120000), "usage": ("unresolved", -30000)}),
+      "credits": ("supported", -120000), "usage": ("unresolved", -30000), "context": ("observed", None)}),
     ("December High Winter", {"snapshot": "refreshed", "month": "2025-12-01", "group": "high_winter"},
-     {"bridge": ("calculated", 220000)}),
+     {"bridge": ("calculated", 220000), "context": ("observed", None)}),
 )
 
 
@@ -21,12 +21,13 @@ def main():
         assert result["kind"] == "result", f"{name}: {result['kind']}"
         actual = {row["key"]: (row["status"], row["amount_cents"]) for row in result["findings"]}
         assert actual == expected, (name, actual)
-        assert len([item for item in events if item["kind"] == "checked"]) == 4
+        assert len([item for item in events if item["kind"] == "checked"]) == 5
         assert all(row["evidence"] for row in result["findings"])
         if name == "December Solar":
             refs = {row["key"]: {item["id"] for item in row["evidence"]} for row in result["findings"]}
             assert "solar-plan-v2" in refs["credits"]
             assert "solar-settlement-dec" in refs["settlement"]
+            assert "ercot-rtcb-go-live" in refs["context"]
             assert all("solar-plan-future" not in ids for ids in refs.values())
         print(f"{name}: live tools, findings, evidence and exact cents verified", flush=True)
 

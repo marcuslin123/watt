@@ -1,6 +1,6 @@
 # Watt — Product Requirements and Roadmap
 
-Status: local demo in development. [Design](design.md) owns technical decisions; [progress](../PROGRESS.md) records verified results and current work.
+Status: local demo verified in a fresh checkout. [Design](design.md) owns technical decisions; [progress](../PROGRESS.md) records the verification, screenshots, and walkthrough.
 
 ## Product brief
 
