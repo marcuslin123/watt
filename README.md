@@ -44,3 +44,35 @@ python3 -m venv .venv
 ```
 
 The checks query PostgreSQL as `watt_analyst`. They cover effective dates, publication cutoffs, replacement versions, exact IDs and contract scope, and an intentionally unresolved usage change. The library is synthetic and its records do not authorize actions.
+
+## Run the portfolio workspace
+
+After loading PostgreSQL and installing the Python requirements, create the reporting login once using the setup connection from the database section. Use a separate password. For the connection URL below, use a URL-safe password (for example, a random hex string).
+
+```sh
+read -rs WATT_READER_PASSWORD
+export WATT_READER_PASSWORD
+.venv/bin/python -m watt.provision_reader
+export WATT_READER_DSN="postgresql://watt_reader:${WATT_READER_PASSWORD}@127.0.0.1:${WATT_DB_PORT:-55432}/watt"
+npm --prefix web ci
+```
+
+Run these in separate terminals (export `WATT_READER_DSN` in the API terminal):
+
+```sh
+.venv/bin/python -m uvicorn watt.api:app --host 127.0.0.1 --port 8000
+npm --prefix web run dev -- --hostname 127.0.0.1
+```
+
+Open [the local workspace](http://127.0.0.1:3000). The API runs with the reporting login, never the setup account. If the login already exists, reuse its original password and skip provisioning.
+
+To verify the browser flow with the API and frontend launched by Playwright (with `WATT_READER_DSN` set):
+
+```sh
+(cd web && npx playwright install chromium)
+npm --prefix web run test:e2e
+npm --prefix web run typecheck
+npm --prefix web run build
+```
+
+The [portfolio](docs/evidence/portfolio.png) and [contract](docs/evidence/contract.png) captures show the live synthetic December reporting snapshot. The assertions separately verify API totals, snapshot switching, the margin basis, contract drill-down, and adjustment visibility.

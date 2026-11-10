@@ -4,7 +4,7 @@
 
 The local Codex SDK feasibility probe passed. The [product brief and roadmap](docs/prd.md) describe demo acceptance and future work; the [design](docs/design.md) owns technical decisions. [AGENTS.md](AGENTS.md) records durable working rules.
 
-The Python margin foundation and local PostgreSQL snapshots are verified. No application service or frontend has been built. The SDK probe ran in a temporary Python environment using only a synthetic fixture.
+The Python margin foundation, PostgreSQL snapshots, and portfolio workspace are verified. The investigator is the next milestone. The SDK probe ran in a temporary Python environment using only a synthetic fixture.
 
 ## SDK feasibility evidence — 2026-11-09
 
@@ -31,9 +31,15 @@ The Python margin foundation and local PostgreSQL snapshots are verified. No app
 - Seeded a synthetic library with dated plan revisions, a December settlement note, and a contract-specific service record. Parameterized search applies the snapshot publication cutoff and selected month’s effective dates, selects the latest applicable revision, then filters and ranks matching text.
 - Eight live retrieval cases passed, including later publication, stale revision, wrong contract, and unresolved usage. Full PostgreSQL reconciliation and all eight Python unit tests also passed. An independent read-only subagent reran the retrieval cases and confirmed the analyst grants.
 
+## Portfolio experience — 2026-11-10
+
+- Added a FastAPI reporting API and Next.js workspace for snapshot refresh, reported and normalized views, monthly trend, group reconciliation, and contract-month components. The service uses a dedicated reporting-only login with read-only transactions.
+- All four Playwright checks, TypeScript, production build, and eight Python tests passed. Browser captures: [portfolio](docs/evidence/portfolio.png) and [contract](docs/evidence/contract.png).
+- A read-only subagent independently checked the live handlers against Python, December exclusion, contract coverage and adjustments, and the actual reader role. It also inspected the captured portfolio.
+
 ## Next milestone
 
-Define the portfolio API and build the portfolio and contract drill-down in the next authorized milestone. Keep the SDK integration behind the investigator interface and verify the worker's tool allowlist before connecting it to any data source.
+Implement the persisted investigator, scoped tools, evidence validation, live progress, and unresolved findings. Verify the worker's tool allowlist before connecting Codex to the synthetic data.
 
 ## Updating this log
 
