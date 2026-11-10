@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { ArrowDownRight, ArrowLeft, ArrowUpRight, ChevronRight, Database, RefreshCw, Search, Zap } from "lucide-react";
+import Investigation from "./investigation";
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 type Snapshot = "initial" | "refreshed";
@@ -47,6 +48,16 @@ function Movement({value}: {value:number|null}) {
 }
 
 export default function Portfolio() {
+  const [runId, setRunId] = useState("");
+  const [startError, setStartError] = useState("");
+  const [starting, setStarting] = useState(false);
+  useEffect(() => {setRunId(new URLSearchParams(window.location.search).get("run") ?? "");},[]);
+  const showRun = (id:string) => {
+    const url = new URL(window.location.href);
+    if (id) url.searchParams.set("run",id); else url.searchParams.delete("run");
+    window.history.replaceState(null,"",url);
+    setRunId(id);
+  };
   const [snapshot, setSnapshot] = useState<Snapshot>("initial");
   const [basis, setBasis] = useState<Basis>("reported");
   const [month, setMonth] = useState("");
@@ -68,6 +79,20 @@ export default function Portfolio() {
   const movement = data ? (basis === "reported" ? data.delta : data.normalized_delta) : null;
   const focusedMonth = detail?.months.find(row => row.month === monthDetail);
   const focusedAdjustments = detail?.adjustments.filter(row => row.posting_month === monthDetail) ?? [];
+
+  async function startRun(customerGroup:string) {
+    if (!data) return;
+    setStarting(true);setStartError("");
+    try {
+      const response=await fetch("/api/investigations",{method:"POST",headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({snapshot,month:data.month,group:customerGroup})});
+      if(!response.ok) throw new Error((await response.json()).detail ?? "Unable to start the investigation");
+      showRun((await response.json()).id);
+    } catch(cause) {setStartError((cause as Error).message);}
+    finally {setStarting(false);}
+  }
+
+  if (runId) return <main className="workspace"><Investigation key={runId} id={runId} back={()=>showRun("")} change={showRun}/></main>;
 
   return <div className="shell">
     <header className="topbar"><a className="brand" href="/"><span className="brand-icon"><Zap size={19} fill="currentColor"/></span> watt<span className="brand-dot">.</span></a>
@@ -136,12 +161,13 @@ export default function Portfolio() {
                 <Area dataKey={basis} stroke="#2f7768" fill="url(#fill)" strokeWidth={2} isAnimationActive={false}/>
               </AreaChart></ResponsiveContainer>
             </div></section>
+          {startError && <p className="panel notice" role="alert">{startError}</p>}
           <section className="panel groups"><div className="panel-head"><div><p className="eyebrow">RECONCILIATION</p><h2>Customer group contribution</h2></div><p>Group movements reconcile to the portfolio.</p></div>
             <div className="table-wrap"><table><thead><tr><th>Customer group</th><th>Customers</th><th>Margin / customer</th><th>Margin</th><th>Monthly change</th><th>Review</th></tr></thead>
               <tbody>{data.groups.map(row => <tr key={row.group}><td><button className="text-button" aria-label={`Browse ${groups[row.group]} contracts`}
                 onClick={() => {setGroup(row.group);setSearch("");setOffset(0);}}>{groups[row.group]} <ChevronRight size={14}/></button></td>
                 <td>{row.customer_count.toLocaleString()}</td><td>{row.customer_count ? dollars(row[basis]/row.customer_count) : "—"}</td>
-                <td>{dollars(row[basis])}</td><td><Movement value={groupDelta(row)}/></td><td>{row.flagged && <span className="flag" title="Material movement on a reported basis">Material</span>}</td></tr>)}</tbody>
+                <td>{dollars(row[basis])}</td><td><Movement value={groupDelta(row)}/></td><td>{row.flagged && <button className="button ghost" disabled={starting} onClick={()=>startRun(row.group)} aria-label={`Investigate ${groups[row.group]}`}>Investigate</button>}</td></tr>)}</tbody>
               <tfoot><tr><td colSpan={3}>Portfolio total</td><td>{dollars(data[basis])}</td><td><Movement value={movement}/></td><td/></tr></tfoot>
             </table></div></section>
           {group && <section className="panel"><div className="panel-head"><div><p className="eyebrow">GROUP DRILL-DOWN</p><h2>{groups[group]} contracts</h2></div>

@@ -1,29 +1,13 @@
 """Local HTTP interface for Watt's PostgreSQL reporting views."""
-from contextlib import contextmanager
 from datetime import date
-import os
 from typing import Literal
 
 from fastapi import FastAPI, HTTPException, Query
-import psycopg
-from psycopg.rows import dict_row
+from .db import reporting
 
 app = FastAPI(title="Watt")
 Snapshot = Literal["initial", "refreshed"]
 Group = Literal["solar", "high_winter", "low_winter", "unclassified"]
-
-
-@contextmanager
-def reporting():
-    dsn = os.environ.get("WATT_READER_DSN")
-    if not dsn:
-        raise HTTPException(503, "Set WATT_READER_DSN for the reporting database")
-    try:
-        with psycopg.connect(dsn, row_factory=dict_row, connect_timeout=4,
-                             options="-c default_transaction_read_only=on -c statement_timeout=10000") as conn:
-            yield conn
-    except psycopg.Error as exc:
-        raise HTTPException(503, "Reporting database unavailable") from exc
 
 
 def fetch(conn, sql, *params):
@@ -126,3 +110,8 @@ def contract_detail(contract_id: str, snapshot: Snapshot):
     return {**total, "snapshot": snapshot,
             "months": [int_fields(row, ("reported", "normalized")) for row in months],
             "adjustments": adjustments}
+
+
+from .workflow import router as investigations
+
+app.include_router(investigations)

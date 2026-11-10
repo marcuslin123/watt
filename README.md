@@ -76,3 +76,23 @@ npm --prefix web run build
 ```
 
 The [portfolio](docs/evidence/portfolio.png) and [contract](docs/evidence/contract.png) captures show the live synthetic December reporting snapshot. The assertions separately verify API totals, snapshot switching, the margin basis, contract drill-down, and adjustment visibility.
+
+## Run the local investigator
+
+With the setup PostgreSQL connection still exported, provision a separate state login once. Use a fresh URL-safe password and keep it outside the repository.
+
+```sh
+read -rs WATT_STATE_PASSWORD
+export WATT_STATE_PASSWORD
+.venv/bin/python -m watt.provision_state
+export WATT_STATE_DSN="postgresql://watt_state:${WATT_STATE_PASSWORD}@127.0.0.1:${WATT_DB_PORT:-55432}/watt"
+```
+
+Use `codex login status` to confirm ChatGPT sign-in, or sign in with `codex login`. Watt’s runtime checks for ChatGPT authentication and does not fall back to API-key billing. Export `WATT_READER_DSN` and `WATT_STATE_DSN` in both the API and worker terminals. Start the API and web app as above and run `.venv/bin/python -m watt.worker` in a third terminal. Refresh the portfolio and choose **Investigate** on a flagged group. The run URL can be reopened after a reload. Only Watt's scoped tools are admitted by the Codex inventory gate; the child process cannot access the workflow-state credential.
+
+```sh
+.venv/bin/python -m watt.verify_agent
+WATT_RUN_LIVE=1 npm --prefix web run test:e2e
+```
+
+The browser suite’s live investigation case requires the worker to be running. It verifies live progress, the three synthetic drivers, evidence inspection, and persisted findings; see the [investigation capture](docs/evidence/investigation.png).

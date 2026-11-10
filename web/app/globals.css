@@ -70,3 +70,8 @@ footer{padding:10px 0 25px;color:#526961;font-size:11px}
 @media(max-width:760px){.intro{align-items:flex-start;flex-direction:column}.workspace{padding-inline:14px}.snapshot{white-space:normal}.metrics{grid-template-columns:1fr}.panel-head{align-items:flex-start;flex-wrap:wrap}.top-meta>span:last-child,.top-divider{display:none}}
 
 .month-detail{padding:12px 19px 0;background:#f8faf7;border-top:1px solid #e9eee8}.month-detail h3{font-weight:700;margin-bottom:10px}.month-detail .components{padding-inline:0}
+.investigation{padding-bottom:26px}.invest-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(240px,320px);gap:15px;align-items:start}
+.finding{padding:17px 19px}.finding-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}.finding h2{font-size:19px;font-weight:750;margin-bottom:7px}.finding p{font-size:13px;color:#526961}
+.evidence-buttons{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}.evidence-detail{margin-top:13px;background:#f6f8f4;border:1px solid #dce4db;padding:12px;border-radius:8px}.evidence-detail pre{white-space:pre-wrap;max-height:260px;overflow:auto;font-size:12px}.evidence-detail small{color:#53665f}
+.run-log ol{margin:0;padding:0 17px;list-style:none}.run-log li{border-top:1px solid #e7eee7;padding:9px 0;font-size:12px}.run-log li span{display:inline-block;min-width:63px;font-weight:700;color:#2f7768}
+@media(max-width:760px){.invest-grid{grid-template-columns:1fr}}

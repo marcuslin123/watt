@@ -4,7 +4,7 @@
 
 The local Codex SDK feasibility probe passed. The [product brief and roadmap](docs/prd.md) describe demo acceptance and future work; the [design](docs/design.md) owns technical decisions. [AGENTS.md](AGENTS.md) records durable working rules.
 
-The Python margin foundation, PostgreSQL snapshots, and portfolio workspace are verified. The investigator is the next milestone. The SDK probe ran in a temporary Python environment using only a synthetic fixture.
+The Python margin foundation, PostgreSQL snapshots, portfolio workspace, and live investigator are verified. Analyst review and retention comparison are next.
 
 ## SDK feasibility evidence — 2026-11-09
 
@@ -37,9 +37,16 @@ The Python margin foundation, PostgreSQL snapshots, and portfolio workspace are 
 - All four Playwright checks, TypeScript, production build, and eight Python tests passed. Browser captures: [portfolio](docs/evidence/portfolio.png) and [contract](docs/evidence/contract.png).
 - A read-only subagent independently checked the live handlers against Python, December exclusion, contract coverage and adjustments, and the actual reader role. It also inspected the captured portfolio.
 
+## Scoped investigator — 2026-11-10
+
+- Added a PostgreSQL-backed queue, a single bounded worker, persisted events and findings, browser progress streaming, cancellation, and rerun lineage. The worker uses a separate state login; Codex and its tools do not receive that credential.
+- The live Codex SDK gate verified ChatGPT sign-in and the actual tool inventory before querying Watt. Process-local overrides disable inherited desktop tools. Only four read-only analytical tools are allowed. The model selects finding keys; published amounts, evidence, and uncertainty statuses come from checked SQL results and applicable records.
+- Both live golden evals (Solar and High Winter Usage), all six Playwright checks including the live reload and partial-result view, all 11 Python tests, typecheck, and production build passed. [Live investigation capture](docs/evidence/investigation.png).
+- A read-only subagent inspected the persisted live results and caught partial-limit and failure handling issues. Both were fixed and rechecked so validated findings keep their keys and an unexpected worker error does not discard a saved checkpoint.
+
 ## Next milestone
 
-Implement the persisted investigator, scoped tools, evidence validation, live progress, and unresolved findings. Verify the worker's tool allowlist before connecting Codex to the synthetic data.
+Add analyst evidence and targeted revisions, follow-up questions, and the retention scenario comparison. Then verify a fresh checkout and record the complete demo.
 
 ## Updating this log
 
