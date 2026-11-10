@@ -4,7 +4,7 @@
 
 The local Codex SDK feasibility probe passed. The [product brief and roadmap](docs/prd.md) describe demo acceptance and future work; the [design](docs/design.md) owns technical decisions. [AGENTS.md](AGENTS.md) records durable working rules.
 
-The Python margin foundation, PostgreSQL snapshots, portfolio workspace, and live investigator are verified. Analyst review and retention comparison are next.
+The Python margin foundation, PostgreSQL snapshots, portfolio workspace, live investigator, and decision support are verified. Fresh-checkout delivery remains.
 
 ## SDK feasibility evidence — 2026-11-09
 
@@ -44,9 +44,15 @@ The Python margin foundation, PostgreSQL snapshots, portfolio workspace, and liv
 - Both live golden evals (Solar and High Winter Usage), all six Playwright checks including the live reload and partial-result view, all 11 Python tests, typecheck, and production build passed. [Live investigation capture](docs/evidence/investigation.png).
 - A read-only subagent inspected the persisted live results and caught partial-limit and failure handling issues. Both were fixed and rechecked so validated findings keep their keys and an unexpected worker error does not discard a saved checkpoint.
 
+## Analyst review and decision support — 2026-11-10
+
+- Added dated analyst evidence, child revisions with parent links, bounded plain-language follow-ups, and a 12-month retention comparison with editable assumptions and a break-even threshold. A single supplied record does not change historical amounts or resolve the group cause.
+- The live browser flow checked original-run preservation, analyst provenance, an unresolved follow-up, and scenario sensitivity ($420 at 80% stay probability versus −$1,230 at 70%). [Retention comparison capture](docs/evidence/retention.png).
+- All six browser checks, TypeScript, and the production build passed. An independent read-only subagent verified the saved revision and scenario. Its fractional-cent finding led to a regression test and a rounding fix; all 18 Python tests and the two affected browser checks then passed.
+
 ## Next milestone
 
-Add analyst evidence and targeted revisions, follow-up questions, and the retention scenario comparison. Then verify a fresh checkout and record the complete demo.
+Audit the demo requirements, verify a fresh checkout with a new local database, and record the complete browser walkthrough.
 
 ## Updating this log
 

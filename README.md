@@ -95,4 +95,6 @@ Use `codex login status` to confirm ChatGPT sign-in, or sign in with `codex logi
 WATT_RUN_LIVE=1 npm --prefix web run test:e2e
 ```
 
-The browser suite’s live investigation case requires the worker to be running. It verifies live progress, the three synthetic drivers, evidence inspection, and persisted findings; see the [investigation capture](docs/evidence/investigation.png).
+The browser suite’s live investigation case requires the worker to be running. It verifies live progress, the three synthetic drivers, evidence inspection, analyst review, and scenario comparison; see the [investigation capture](docs/evidence/investigation.png) and [retention comparison](docs/evidence/retention.png).
+
+For the synthetic walkthrough, attach a dated record to contract `contract-00000` in the unresolved December Solar finding. The browser test uses December 15 and the illustrative note “This example record states that service ended on December 15.” The app labels it analyst supplied, keeps the original run, and does not infer that all affected customers moved out. Ask “Did they move out?” to inspect the unresolved finding, then compare the default retention inputs and change the with-offer probability from 80% to 70%.

@@ -7,11 +7,13 @@ import time
 
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
+from pydantic import BaseModel, Field
 import psycopg
 from psycopg.rows import dict_row
 from psycopg.types.json import Jsonb
 
 from .db import reporting
+from .decisions import Resolution, Scenario, apply_resolution, calculate_scenario, follow_up
 from .investigation import Scope
 
 router = APIRouter(prefix="/api/investigations")
@@ -116,3 +118,44 @@ def rerun(run_id: UUID):
     if row["status"] in ACTIVE:
         raise HTTPException(409, "Finish or cancel this run before rerunning")
     return enqueue(Scope.model_validate(row["scope"]), run_id)
+
+
+class Question(BaseModel):
+    question: str = Field(min_length=3, max_length=300)
+
+
+@router.post("/{run_id}/review", status_code=201)
+def review(run_id: UUID, resolution: Resolution):
+    revision = uuid4()
+    with state() as conn:
+        row = load(conn, run_id)
+        if row["status"] not in {"completed", "partial"}:
+            raise HTTPException(409, "Only runs with reviewable results can be revised")
+        try:
+            findings = apply_resolution(row["findings"], Scope.model_validate(row["scope"]).month,
+                                        resolution, revision)
+        except ValueError as exc:
+            raise HTTPException(422, str(exc)) from exc
+        conn.execute("""INSERT INTO watt_workflow.run (id,scope,parent_id,status,findings,message)
+            VALUES (%s,%s,%s,%s,%s,'Analyst evidence recorded; original run preserved')""",
+            (revision, Jsonb(row["scope"]), run_id, row["status"], Jsonb(findings)))
+        event(conn, revision, "reviewed", "Analyst record attached to the usage finding")
+    return {"id": revision, "parent_id": run_id, "status": row["status"]}
+
+
+@router.post("/{run_id}/follow-up")
+def answer(run_id: UUID, question: Question):
+    with state() as conn:
+        row = load(conn, run_id)
+    return follow_up(row["findings"], question.question)
+
+
+@router.post("/{run_id}/scenario")
+def scenario(run_id: UUID, assumptions: Scenario):
+    with state() as conn:
+        row = load(conn, run_id)
+    if row["status"] not in {"completed", "partial"} or not row["findings"]:
+        raise HTTPException(409, "Run the investigation before comparing a scenario")
+    return {**calculate_scenario(assumptions), "scope": row["scope"],
+            "usage_unresolved": any(item["key"] == "usage" and item["status"] == "unresolved"
+                                    for item in row["findings"])}

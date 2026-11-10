@@ -1,11 +1,12 @@
 "use client";
 
+import Decisions, { ReviewForm } from "./decisions";
 import { useEffect, useState } from "react";
 import { ArrowLeft, CircleAlert, FileCheck2, FlaskConical } from "lucide-react";
 
 type Event = { id: number; kind: string; text: string };
-type Evidence = { tool:string; id:string; title:string; document?:{body:string; section:string; effective_from:string; published_on:string; synthetic:boolean}; [key:string]: unknown };
-type Finding = {key:string; status:string; title:string; detail:string; amount_cents:number|null; evidence:Evidence[]};
+type Evidence = { tool:string; id:string; title:string; document?:{body:string; section:string; effective_from:string; published_on:string; synthetic:boolean}; record?:{provenance:string;source:string;record_date:string;contract_id:string;note:string}; [key:string]: unknown };
+type Finding = {key:string; status:string; title:string; detail:string; amount_cents:number|null; reviewed_contracts?:string[]; evidence:Evidence[]};
 type Run = { id:string; scope:{snapshot:string; month:string; group:string}; parent_id:string|null;
   status:string; findings:Finding[]; message:string|null; events:Event[] };
 const active = new Set(["queued","running"]);
@@ -61,6 +62,7 @@ export default function Investigation({id, back, change}: {id:string; back:()=>v
     {run && <div className="invest-grid">
       <div>
         {run.message && <p className="panel notice" role="status">{run.message}</p>}
+        {run.parent_id && <button className="button ghost revision-link" onClick={()=>change(run.parent_id!)}>Open parent run</button>}
         {run.findings.map(finding=><article key={finding.key} className="panel finding">
           <div className="finding-top"><span className={finding.status==="unresolved"?"flag":"synthetic"}>{finding.status}</span>
             {finding.amount_cents!==null && <strong>{cents(finding.amount_cents)}</strong>}</div>
@@ -70,10 +72,15 @@ export default function Investigation({id, back, change}: {id:string; back:()=>v
             <FileCheck2 size={14}/>{item.title}</button>)}</div>
           {finding.evidence.filter(item=>selected===finding.key+item.id).map(item=><div className="evidence-detail" key={item.id}>
             <p className="eyebrow">SOURCE · {item.id}</p>
-            {item.document ? <><p>{item.document.body}</p><small>{item.document.section} · effective {item.document.effective_from} · published {item.document.published_on} · {item.document.synthetic?"synthetic record":"public source"}</small></>
+            {item.record ? <><p>{item.record.note}</p><small>{item.record.provenance} · {item.record.contract_id} · {item.record.record_date}</small></>
+              : item.document ? <><p>{item.document.body}</p><small>{item.document.section} · effective {item.document.effective_from} · published {item.document.published_on} · {item.document.synthetic?"synthetic record":"public source"}</small></>
               : <pre>{JSON.stringify(Object.fromEntries(Object.entries(item).filter(([key])=>!["id","title","tool"].includes(key))),null,2)}</pre>}
           </div>)}
+          {finding.key==="usage" && ["completed","partial"].includes(run.status) && <ReviewForm id={run.id} revise={change}
+            contracts={((finding.evidence.find(item=>item.id==="usage-drops")?.sample as string[]|undefined) ?? [])
+              .filter(contract=>!finding.reviewed_contracts?.includes(contract))}/>}
         </article>)}
+        {run.findings.length>0 && ["completed","partial"].includes(run.status) && <Decisions id={run.id}/>}
         {!run.findings.length && <p className="panel notice"><CircleAlert size={15}/> No verified findings published yet.</p>}
       </div>
       <aside className="panel run-log"><div className="panel-head"><div><p className="eyebrow">EXECUTION LOG</p><h2>Investigation activity</h2></div><FlaskConical size={18}/></div>
