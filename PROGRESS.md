@@ -21,7 +21,7 @@ The local demo passed the fresh-checkout rehearsal, including a live Codex inves
 
 ## PostgreSQL snapshots — 2026-11-10
 
-- Loaded 10,000 synthetic contracts, 240,000 contract-month rows, and 20 adjustments into local PostgreSQL 17.11. The transactional loader refuses an existing installation rather than replacing it. The [README](README.md#load-and-verify-postgresql) documents setup, loading, and verification.
+- Loaded 10,000 synthetic contracts, 240,000 contract-month rows, and 20 adjustments into local PostgreSQL 17.11. The transactional loader refuses an existing installation rather than replacing it. The [local setup guide](docs/local-setup.md#load-and-verify-postgresql) documents setup, loading, and verification.
 - Ran `python3 -m watt.verify_postgres` as the read-only reporting role. The initial snapshot ended in November (230,000 rows); the refreshed snapshot included December (240,000 rows). Every contract-month, contract total and coverage count, group-month total, and portfolio-month total matched Python for reported and normalized margins.
 - A separate read-only subagent confirmed the snapshot cutoffs, December-only adjustments, exact November and December group totals, and no write or private-schema access for `watt_analyst`. The eight Python unit tests also passed.
 - Computing the fixed winter median once per query reduced the measured December portfolio rollup from about 20 seconds to 103 ms on this local run. This is a query measurement, not an application latency benchmark.
@@ -88,6 +88,10 @@ The local demo passed the fresh-checkout rehearsal, including a live Codex inves
 ## Product requirements — 2026-11-10
 
 - Expanded the [PRD](docs/prd.md) with user roles, prioritized requirements, acceptance criteria, proposed pilot measures, rollout gates, and open product decisions. The local demo and proposed pilot have distinct acceptance criteria.
+
+## Repository overview — 2026-11-11
+
+- Rewrote the [README](README.md) around the month-end workflow and the December Solar example. Added a current dashboard capture and moved full setup and verification commands into the [local setup guide](docs/local-setup.md).
 
 ## Updating this log
 
