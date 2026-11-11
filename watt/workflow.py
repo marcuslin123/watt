@@ -98,7 +98,7 @@ def stream(run_id: UUID, after: int = 0):
             time.sleep(1)
 
     return StreamingResponse(messages(), media_type="text/event-stream",
-                             headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
+                             headers={"Cache-Control": "no-cache, no-transform", "X-Accel-Buffering": "no"})
 
 
 @router.post("/{run_id}/cancel")

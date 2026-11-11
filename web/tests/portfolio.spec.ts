@@ -26,6 +26,11 @@ test("refresh, switch margin basis, and drill into a real contract", async ({ pa
   await expect(page.getByRole("row", { name: /Solar/ })).toContainText("−$2,400.00");
   await page.getByRole("button", { name: "Normalized", exact: true }).click();
   await expect(page.getByTestId("reported-total")).toHaveText("$571,222.95");
+  await page.getByLabel("Month", { exact: true }).selectOption("2025-11-01");
+  await expect(page.getByTestId("reported-total")).toHaveText("$571,322.95");
+  await expect(page.getByLabel("Snapshot", { exact: true })).toHaveValue("refreshed");
+  await page.getByLabel("Month", { exact: true }).selectOption("2025-12-01");
+  await expect(page.getByTestId("reported-total")).toHaveText("$571,222.95");
   await page.getByRole("button", { name: "Reported", exact: true }).click();
   await page.getByRole("button", { name: "Browse Solar contracts" }).click();
   await page.getByRole("button", { name: "contract-00000", exact: true }).click();

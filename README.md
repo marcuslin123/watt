@@ -1,6 +1,6 @@
 # Watt
 
-Watt investigates margin changes in a retail electricity portfolio. See the [product brief](docs/prd.md), [design](docs/design.md), and [progress log](PROGRESS.md).
+Watt investigates margin changes in a retail electricity portfolio. See the [product requirements document](docs/prd.md), [design](docs/design.md), and [progress log](PROGRESS.md).
 
 [Watch the verified browser walkthrough](docs/evidence/demo.webm) (WebM, no narration).
 
@@ -91,7 +91,7 @@ export WATT_STATE_PASSWORD
 export WATT_STATE_DSN="postgresql://watt_state:${WATT_STATE_PASSWORD}@127.0.0.1:${WATT_DB_PORT:-55432}/watt"
 ```
 
-Use `codex login status` to confirm ChatGPT sign-in, or sign in with `codex login`. Watt’s runtime checks for ChatGPT authentication and does not fall back to API-key billing. Export `WATT_READER_DSN` and `WATT_STATE_DSN` in both the API and worker terminals. Start the API and web app as above and run `.venv/bin/python -m watt.worker` in a third terminal. Refresh the portfolio and choose **Investigate** on a flagged group. The run URL can be reopened after a reload. Only Watt's scoped tools are admitted by the Codex inventory gate; the child process cannot access the workflow-state credential.
+Use `codex login status` to confirm ChatGPT sign-in, or sign in with `codex login`. Watt’s runtime checks for ChatGPT authentication and does not fall back to API-key billing. Export `WATT_READER_DSN` and `WATT_STATE_DSN` in both the API and worker terminals. Start the API and web app as above and run `.venv/bin/python -m watt.worker` in a third terminal. Refresh the portfolio, choose a customer group, and click **Run investigation**. Flagged groups also have an **Investigate** shortcut. The run URL can be reopened after a reload. Only Watt's scoped tools are admitted by the Codex inventory gate; the child process cannot access the workflow-state credential.
 
 ```sh
 .venv/bin/python -m watt.verify_agent

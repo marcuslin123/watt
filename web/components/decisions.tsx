@@ -1,6 +1,9 @@
 "use client";
 
+import { Button } from "./ui/button";
+
 import { FormEvent, useState } from "react";
+import { ChevronDown } from "lucide-react";
 
 const dollars = (amount: number) => new Intl.NumberFormat("en-US", {style:"currency", currency:"USD"}).format(amount / 100);
 const percent = (value: number) => (value / 100).toFixed(2) + "%";
@@ -30,13 +33,13 @@ export function ReviewForm({id, contracts, revise}: {id:string; contracts:string
   }
   return <details className="review-form">
     <summary>Attach analyst evidence</summary>
-    <p>Use a dated record for one contract in this finding. Watt preserves the original run and records your source.</p>
+    <p>Add a dated record for this contract.</p>
     <form onSubmit={submit}>
       <label>Contract<select name="contract_id" required>{contracts.map(contract=><option key={contract}>{contract}</option>)}</select></label>
       <label>Record date<input type="date" name="record_date" required/></label>
       <label>Source<input name="source" required minLength={4} maxLength={120} placeholder="Service record or meter review"/></label>
       <label className="wide">What does the record show?<textarea name="note" required minLength={12} maxLength={600} rows={3}/></label>
-      <button className="button primary" disabled={busy}>Save evidence as revision</button>
+      <Button variant="primary" type="submit" disabled={busy}>Save evidence as revision</Button>
     </form>
     {message && <p role="alert">{message}</p>}
   </details>;
@@ -69,41 +72,45 @@ export default function Decisions({id}: {id:string}) {
     finally {setCalculating(false);}
   }
   return <>
-    <section className="panel decision" aria-label="Investigation follow-up">
-      <p className="eyebrow">SAVED FINDINGS</p><h2>Ask a follow-up</h2>
-      <form className="question-form" onSubmit={ask}>
-        <label>Question<input name="question" required minLength={3} maxLength={300} placeholder="Which drivers explain the margin decline?"/></label>
-        <button className="button primary" disabled={asking}>Ask Watt</button>
-      </form>
-      {questionError && <p role="alert">{questionError}</p>}
-      {answer && <div aria-live="polite"><p>{answer.message}</p>
-        {answer.rows.length>0 && <div className="table-wrap"><table><thead><tr><th>Finding</th><th>Amount</th><th>Status</th></tr></thead>
-          <tbody>{answer.rows.map(row=><tr key={row.title}><td>{row.title}<small>{row.detail} · {row.sources.join(", ")}</small></td>
-            <td>{row.amount_cents===null?"—":dollars(row.amount_cents)}</td><td>{row.status}</td></tr>)}</tbody></table></div>}</div>}
-    </section>
-    <section className="panel decision" aria-label="Retention scenario">
-      <p className="eyebrow">DECISION SUPPORT / 12 MONTHS</p><h2>Compare a retention offer</h2>
-      <p>Illustrative assumptions, not a forecast. Future contribution is conditional on staying and is entered separately from historical margin.</p>
-      <form className="scenario-form" onSubmit={compare}>
-        <label>Customers<input name="customers" type="number" min={1} max={10000} defaultValue={60} required/></label>
-        <label>Contribution if retained ($)<input name="contribution" type="number" step=".01" min={-100000} max={100000} defaultValue={300} required/></label>
-        <label>Stay probability without offer (%)<input name="baseline" type="number" step=".01" min={0} max={100} defaultValue={70} required/></label>
-        <label>Stay probability with offer (%)<input name="offer" type="number" step=".01" min={0} max={100} defaultValue={80} required/></label>
-        <label>Outreach per customer ($)<input name="outreach" type="number" step=".01" min={0} max={100000} defaultValue={3} required/></label>
-        <label>Incentive per retained customer ($)<input name="incentive" type="number" step=".01" min={0} max={100000} defaultValue={25} required/></label>
-        <button className="button primary" disabled={calculating}>Compare scenarios</button>
-      </form>
-      {scenarioError && <p role="alert">{scenarioError}</p>}
-      {result && <div className="scenario-result" aria-live="polite">
-        <dl className="components">
-          <div><dt>No offer</dt><dd>{dollars(result.baseline_cents)}</dd></div>
-          <div><dt>With offer</dt><dd>{dollars(result.offer_cents)}</dd></div>
-          <div><dt>Incremental contribution</dt><dd data-testid="scenario-incremental">{dollars(result.incremental_cents)}</dd></div>
-        </dl>
-        <p>{result.break_even_offer_bps===null ? "No feasible break-even at or above the baseline probability." :
-          `Break-even at ${percent(result.break_even_offer_bps)} stay probability (${((result.required_uplift_bps ?? 0)/100).toFixed(2)} percentage points above baseline).`}</p>
-        {result.usage_unresolved && <p className="flag">Usage cause remains unresolved. Confirm assumptions before using this comparison for a decision.</p>}
-      </div>}
-    </section>
+    <details className="report-disclosure">
+      <summary>Ask a follow-up <ChevronDown size={16} aria-hidden="true"/></summary>
+      <section className="decision" aria-label="Investigation follow-up">
+        <form className="question-form" onSubmit={ask}>
+          <label>Question<input name="question" required minLength={3} maxLength={300} placeholder="Which drivers explain the margin decline?"/></label>
+          <Button variant="primary" type="submit" disabled={asking}>Ask Watt</Button>
+        </form>
+        {questionError && <p role="alert">{questionError}</p>}
+        {answer && <div aria-live="polite"><p>{answer.message}</p>
+          {answer.rows.length>0 && <div className="table-wrap"><table><thead><tr><th>Finding</th><th>Amount</th><th>Status</th></tr></thead>
+            <tbody>{answer.rows.map(row=><tr key={row.title}><td>{row.title}<small>{row.detail} · {row.sources.join(", ")}</small></td>
+              <td>{row.amount_cents===null?"—":dollars(row.amount_cents)}</td><td>{row.status}</td></tr>)}</tbody></table></div>}</div>}
+      </section>
+    </details>
+    <details className="report-disclosure">
+      <summary>Compare a retention offer <ChevronDown size={16} aria-hidden="true"/></summary>
+      <section className="decision" aria-label="Retention scenario">
+        <p>12-month scenario · Enter your assumptions.</p>
+        <form className="scenario-form" onSubmit={compare}>
+          <label>Customers<input name="customers" type="number" min={1} max={10000} defaultValue={60} required/></label>
+          <label>Contribution if retained ($)<input name="contribution" type="number" step=".01" min={-100000} max={100000} defaultValue={300} required/></label>
+          <label>Stay probability without offer (%)<input name="baseline" type="number" step=".01" min={0} max={100} defaultValue={70} required/></label>
+          <label>Stay probability with offer (%)<input name="offer" type="number" step=".01" min={0} max={100} defaultValue={80} required/></label>
+          <label>Outreach per customer ($)<input name="outreach" type="number" step=".01" min={0} max={100000} defaultValue={3} required/></label>
+          <label>Incentive per retained customer ($)<input name="incentive" type="number" step=".01" min={0} max={100000} defaultValue={25} required/></label>
+          <Button variant="primary" type="submit" disabled={calculating}>Compare scenarios</Button>
+        </form>
+        {scenarioError && <p role="alert">{scenarioError}</p>}
+        {result && <div className="scenario-result" aria-live="polite">
+          <dl className="components">
+            <div><dt>No offer</dt><dd>{dollars(result.baseline_cents)}</dd></div>
+            <div><dt>With offer</dt><dd>{dollars(result.offer_cents)}</dd></div>
+            <div><dt>Incremental contribution</dt><dd data-testid="scenario-incremental">{dollars(result.incremental_cents)}</dd></div>
+          </dl>
+          <p>{result.break_even_offer_bps===null ? "No feasible break-even at or above the baseline probability." :
+            `Break-even at ${percent(result.break_even_offer_bps)} stay probability (${((result.required_uplift_bps ?? 0)/100).toFixed(2)} percentage points above baseline).`}</p>
+          {result.usage_unresolved && <p className="flag">Usage cause remains unresolved. Confirm assumptions before using this comparison for a decision.</p>}
+        </div>}
+      </section>
+    </details>
   </>;
 }

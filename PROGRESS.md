@@ -58,6 +58,37 @@ The local demo passed the fresh-checkout rehearsal, including a live Codex inves
 - Final audit added reconciled supply-cost usage/rate effects and dated public context. The ERCOT notice is displayed as context only; the DFW monthly report is excluded because it was issued after the December cutoff. The independent read-only verifier checked the fresh database, all cost effects, the saved run, and captures; its setup-documentation findings were corrected.
 - Browser evidence: [portfolio](docs/evidence/portfolio.png), [contract](docs/evidence/contract.png), [investigation](docs/evidence/investigation.png), [retention](docs/evidence/retention.png), and [full walkthrough](docs/evidence/demo.webm). Chromium played the recorded WebM at 1280 × 720.
 
+## Interface refresh — 2026-11-10
+
+- Restyled the portfolio, contract, investigation, and retention views with a dark palette, local Space Grotesk, Manrope, and IBM Plex Mono fonts, and shared shadcn-inspired button variants. The reporting chart and financial figures have a stronger visual hierarchy.
+- TypeScript and the production build passed. All seven Playwright tests passed with the live worker enabled. Chromium at 1440px and 390px confirmed all three fonts loaded, chart tick labels fit, and the page had no horizontal overflow. The recorded walkthrough above shows the previous interface.
+
+## Demo readability and navigation — 2026-11-10
+
+- Removed portfolio badges, captions, and footer copy. Increased text sizes across tables, forms, and findings. Customer groups now appear above the trend and include a group selector with a direct investigation action. The investigation status follows the worker's start event.
+- Production build and six browser regression checks passed. Confirmed that the launch button appears without scrolling at 1280 × 720 and 390 × 844, and that a saved live investigation still opens its underlying evidence.
+- The first live browser run reached the worker but timed out. The retry completed the Solar investigation through the new launcher and passed the evidence, reload, analyst revision, and retention checks in 20 seconds.
+
+## Investigation progress — 2026-11-10
+
+- The findings area shows a waiting state, the current check, and completed checks using live worker events. Once the run ends, it shows the available findings and the full activity log.
+- The production build, 20 Python tests in the project virtual environment, and seven browser regression tests passed. Verified desktop and mobile layouts and reduced motion. A live Solar walkthrough passed on retry after the first run returned a partial result.
+- Disabled compression for the event response. Chromium confirmed that actual tool activity appeared before the partial report, and the report retained the activity log.
+
+## Investigation report — 2026-11-10
+
+- Combined the margin movement, breakdown, evidence, and next steps into one report. Market context, follow-up questions, retention modeling, and the activity log open on demand. Added brief entry transitions for investigation states and streamed step changes.
+- Production build and all eight Playwright checks passed, including a live Codex run and its follow-up, retention comparison, and revision. Checked saved completed and partial reports at desktop and mobile widths and verified reduced motion in Chromium.
+
+## Run controls and reporting labels — 2026-11-10
+
+- Moved run status into the report scope, gave Cancel run and Run again standalone actions, and replaced finding status badges with a review cue on unresolved findings. Clarified that investigations use reported margin.
+- Production build and seven browser regression checks passed. Verified the revised controls on the saved partial run at phone width and switched reporting months within the December snapshot in Playwright.
+
+## Product requirements — 2026-11-10
+
+- Expanded the [PRD](docs/prd.md) with user roles, prioritized requirements, acceptance criteria, proposed pilot measures, rollout gates, and open product decisions. The local demo and proposed pilot have distinct acceptance criteria.
+
 ## Updating this log
 
 Record the active milestone, concrete verification results, blockers, and the next step. Put product and architecture tradeoffs in the design's decision log and link them here when they affect progress.
